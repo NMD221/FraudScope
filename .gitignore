@@ -1,0 +1,7 @@
+credit_card_fraud_2026.csv
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.DS_Store
