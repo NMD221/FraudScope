@@ -5,3 +5,5 @@ __pycache__/
 venv/
 .env
 .DS_Store
+train_equilibre.csv
+test_original.csv
