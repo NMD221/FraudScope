@@ -5,7 +5,7 @@ st.title("Analyse Exploratoire des Données")
 st.markdown("---")
 
 #On remonte de 2 niveaux puis entre dans 'utils/image_analyse'
-dossier_images = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "image_analyse"))
+dossier_images = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "image_analyse"))
 
 if os.path.exists(dossier_images):
     fichiers_images = [f for f in os.listdir(dossier_images) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
