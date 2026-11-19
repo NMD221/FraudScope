@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Analyser le risque de fraude d’une opération par carte.">
+  <title>Vigie Fraude | Analyse d’opération</title>
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/app.js"></script>
+  <script type="module" src="/live.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="frame topbar-inner">
+      <a class="brand" href="/" aria-label="Accueil Vigie Fraude">
+        <svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="currentColor"/><path d="M20 8.5 29 12v7.5c0 5.5-3.6 9.5-9 12-5.4-2.5-9-6.5-9-12V12l9-3.5Z" fill="none" stroke="#11152a" stroke-width="1.8"/><path d="m15.5 20 3 3 5.8-6" fill="none" stroke="#11152a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Vigie<span class="brand-light"> Fraude</span></span>
+      </a>
+      <nav class="operation-nav" aria-label="Suivi des opérations">
+        <button class="quiet" type="button" data-category="accepted" aria-haspopup="dialog" aria-controls="suivi">Opérations courantes</button>
+        <button class="quiet" type="button" data-category="review" aria-haspopup="dialog" aria-controls="suivi">Opérations douteuses</button>
+        <button class="quiet" type="button" data-category="blocked" aria-haspopup="dialog" aria-controls="suivi">Opérations frauduleuses</button>
+        <button class="quiet" type="button" data-category="lookup" aria-haspopup="dialog" aria-controls="suivi">Rechercher une opération</button>
+        <div class="language-choice" aria-label="Langue">
+          <a href="/" lang="fr" hreflang="fr" aria-current="page">Français</a>
+          <a href="/en" lang="en" hreflang="en">English</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+  <main class="frame">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="dot"></span> Détection de fraude par carte</p>
+        <h1>Analyse d’une opération</h1>
+      </div>
+      <svg class="hero-art" viewBox="0 0 350 220" aria-hidden="true">
+        <defs><pattern id="grid" width="23" height="23" patternUnits="userSpaceOnUse"><path d="M23 0H0v23" fill="none" stroke="#8194c1" stroke-opacity=".2"/></pattern><radialGradient id="fade"><stop offset="0" stop-color="white"/><stop offset="1" stop-color="black"/></radialGradient><mask id="mask"><ellipse cx="200" cy="113" rx="165" ry="124" fill="url(#fade)"/></mask></defs>
+        <rect width="350" height="220" fill="url(#grid)" mask="url(#mask)"/>
+        <g fill="none" stroke="#859ac4" stroke-opacity=".38"><circle cx="220" cy="110" r="48"/><circle cx="220" cy="110" r="75"/><circle cx="220" cy="110" r="101"/><path d="M220 9v202M119 110h202M148 182 292 38M148 38l144 144" stroke-opacity=".2"/></g>
+        <path d="M220 110V9a101 101 0 0 1 71 29Z" fill="#c8ff8a" fill-opacity=".10"/>
+        <path d="m220 110 71-72" stroke="#c8ff8a" stroke-opacity=".75"/><circle cx="220" cy="110" r="4" fill="#c8ff8a"/><circle cx="269" cy="64" r="4" fill="#c8ff8a"/><circle cx="167" cy="151" r="3" fill="#8e9df0"/><circle cx="287" cy="156" r="3" fill="#8e9df0"/>
+      </svg>
+    </section>
+    <p id="bank-mode-note" hidden>Les opérations sont transmises par le système de paiement. Ouvrez une liste de suivi pour les consulter.</p>
+    <div class="workspace">
+      <section class="card input-card" aria-labelledby="form-title">
+        <div class="card-header">
+          <p class="eyebrow"><span class="index">01</span> Entrée</p>
+          <h2 id="form-title">Données de l’opération</h2>
+        </div>
+        <form id="transaction">
+          <div class="field-grid" id="primary-fields"></div>
+          <div id="promoted-fields" hidden>
+            <div id="promoted-grid" class="field-grid"></div>
+          </div>
+          <details id="field-menu">
+            <summary>Afficher les autres champs de l’opération</summary>
+            <div id="fields"><p class="loading">Chargement du formulaire…</p></div>
+          </details>
+          <div class="form-actions">
+            <button type="submit" id="submit" class="primary" disabled>Analyser l’opération <span aria-hidden="true">→</span></button>
+            <button type="button" id="reset" class="quiet" disabled>Rétablir les valeurs par défaut</button>
+          </div>
+          <p id="form-message" role="status"></p>
+        </form>
+      </section>
+      <aside class="sidebar">
+        <section class="card result-card" aria-labelledby="result-title">
+          <div class="card-header">
+            <p class="eyebrow"><span class="index">02</span> Sortie</p>
+            <h2 id="result-title">Résultat de l’analyse</h2>
+          </div>
+          <div id="result" role="status" aria-live="polite">
+            <div class="verdict" id="verdict" data-state="idle">
+              <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17"/><circle cx="20" cy="20" r="9"/><path d="m20 20 13-11"/><circle cx="20" cy="20" r="2" fill="currentColor"/></svg>
+              <div><strong id="decision">En attente d’analyse</strong><p id="decision-note">Vérifiez les données de l’opération, puis lancez l’analyse.</p></div>
+            </div>
+            <div class="score-line"><span>Score de fraude</span><strong id="score">—</strong></div>
+            <div class="track" id="track" role="meter" aria-label="Score de fraude" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><div id="fill"></div><i id="marker"></i></div>
+            <p class="threshold">Seuil de validation <strong id="threshold">—</strong></p>
+            <p class="threshold">Seuil de refus <strong id="block-threshold">—</strong></p>
+          </div>
+          <p class="result-foot">Le score sert à classer les opérations pour examen.</p>
+        </section>
+        <section class="card performance-card" id="performance" aria-labelledby="performance-title">
+          <div class="card-header">
+            <p class="eyebrow"><span class="index">03</span> Évaluation</p>
+            <h2 id="performance-title">Résultats au seuil de validation</h2>
+            <p id="test-summary">Résultats sur le jeu de test.</p>
+          </div>
+          <dl class="stats">
+            <div><dt>Précision</dt><dd id="precision">—</dd></div>
+            <div><dt>Rappel</dt><dd id="recall">—</dd></div>
+            <div><dt>Score F1</dt><dd id="f1">—</dd></div>
+          </dl>
+          <p class="result-foot" id="errors-summary">Régression logistique régularisée</p>
+        </section>
+      </aside>
+    </div>
+    <dialog class="card live-card" id="suivi" aria-labelledby="live-title">
+      <div class="card-header">
+        <div class="live-heading">
+          <h2 id="live-title">Suivi des opérations</h2>
+          <form method="dialog"><button class="quiet" autofocus>Fermer</button></form>
+        </div>
+        <div id="transaction-detail" hidden>
+          <button class="quiet" id="back-to-transactions" type="button">Retour aux opérations</button>
+          <dl class="transaction-details" id="transaction-details"></dl>
+        </div>
+        <p id="category-note" hidden></p>
+        <form class="form-actions" id="transaction-lookup" hidden>
+          <label class="field" for="transaction-reference">
+            <span>Référence bancaire ou identifiant Vigie</span>
+            <input id="transaction-reference" type="search" maxlength="128" autocomplete="off" aria-controls="transaction-suggestions" required>
+          </label>
+          <button class="primary" type="submit">Rechercher</button>
+        </form>
+        <ul id="transaction-suggestions" aria-label="Transactions suggérées" hidden></ul>
+        <span class="visually-hidden" id="suggestions-status" role="status"></span>
+        <div class="form-actions" id="stream-controls">
+          <button class="primary" id="play" type="button" disabled>Démarrer la lecture du CSV</button>
+          <button class="quiet" id="pause" type="button" disabled>Mettre en pause</button>
+          <span id="stream-state" role="status"></span>
+        </div>
+        <div class="form-actions exports">
+          <label>Date de référence <input id="export-date" type="date" required></label>
+          <button class="quiet" type="button" data-export="day">Exporter la journée</button>
+          <button class="quiet" type="button" data-export="week">Exporter la semaine</button>
+        </div>
+        <p id="stream-error" role="alert"></p>
+        <p id="live-error" role="alert"></p>
+        <span class="visually-hidden" id="lookup-status" role="status"></span>
+      </div>
+      <div class="history-scroll" id="history-scroll" tabindex="0" role="region" aria-labelledby="live-title">
+        <table class="history-table">
+          <thead><tr><th>Heure locale</th><th>Montant</th><th>Score</th><th>Décision initiale</th><th>État final ou validation</th><th>Agent de validation</th><th>Motif de validation</th><th id="observation-heading">Observation</th></tr></thead>
+          <tbody id="history"><tr><td colspan="8">Aucune opération enregistrée.</td></tr></tbody>
+        </table>
+      </div>
+    </dialog>
+    <footer>Vigie Fraude <span>·</span> Détection de fraude par carte</footer>
+  </main>
+</body>
+</html>
