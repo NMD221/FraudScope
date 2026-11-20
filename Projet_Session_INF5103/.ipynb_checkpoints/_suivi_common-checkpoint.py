@@ -6,56 +6,53 @@ from datetime import datetime
 
 HISTORY_FILE = Path(__file__).resolve().parent / "historique.csv"
 
-# --- CSS : en-tête collé, boutons et bloc facteurs (palette émeraude / sarcelle) ---
+# --- CSS : en-tête collé, boutons et bloc facteurs (palette émeraude / sarcelle, compatible dark) ---
 st.markdown("""
 <style>
     div[data-testid="stDialog"] div[role="dialog"] > div > div > div[data-testid="stHorizontalBlock"]:nth-of-type(1) {
         position: sticky;
         top: 0;
         z-index: 999;
-        background: #ffffff;
         padding-bottom: 10px;
         border-bottom: 2px solid #14b8a6;
     }
     div[data-testid="stDialog"] .stButton > button,
     div[data-testid="stDialog"] .stDownloadButton > button {
-        background-color: #ffffff !important;
-        color: #0f172a !important;
-        border: 1px solid #cbd5e1 !important;
+        border: 1px solid rgba(148, 163, 184, 0.45) !important;
         border-radius: 6px !important;
         font-weight: 600 !important;
         transition: all 0.15s ease;
     }
     div[data-testid="stDialog"] .stButton > button:hover,
     div[data-testid="stDialog"] .stDownloadButton > button:hover {
-        background-color: #f0fdfa !important;
-        color: #0f766e !important;
+        background-color: rgba(20, 184, 166, 0.16) !important;
+        color: #5eead4 !important;
         border-color: #14b8a6 !important;
     }
     div[data-testid="stDialog"] .stButton > button[kind="primary"] {
         background-color: #0f766e !important;
         color: #ffffff !important;
-        border: 1px solid #0f766e !important;
+        border: 1px solid #14b8a6 !important;
     }
     div[data-testid="stDialog"] .stButton > button[kind="primary"]:hover {
         background-color: #115e59 !important;
-        border-color: #115e59 !important;
+        border-color: #5eead4 !important;
     }
     .factor-inline {
         margin-top: 8px;
         padding: 8px 10px;
-        background-color: #f8fafc;
+        background-color: rgba(15, 23, 42, 0.06);
         border-left: 3px solid #0d9488;
-        border-top: 1px solid #e2e8f0;
-        border-right: 1px solid #e2e8f0;
-        border-bottom: 1px solid #e2e8f0;
+        border-top: 1px solid rgba(148, 163, 184, 0.3);
+        border-right: 1px solid rgba(148, 163, 184, 0.3);
+        border-bottom: 1px solid rgba(148, 163, 184, 0.3);
         border-radius: 0 6px 6px 0;
         font-size: 12px;
-        color: #334155;
+        color: inherit;
     }
     .factor-inline-title {
         font-weight: 700;
-        color: #0f766e;
+        color: #14b8a6;
         margin-bottom: 4px;
     }
     .factor-inline ul {
@@ -66,9 +63,14 @@ st.markdown("""
         margin-bottom: 3px;
     }
     .factor-inline-cov {
-        color: #475569;
+        opacity: 0.85;
         font-size: 11.5px;
         font-weight: 500;
+    }
+    div[data-testid="stDialog"] [data-testid="stWidgetLabel"],
+    div[data-testid="stDialog"] [data-testid="stWidgetLabel"] p {
+        color: inherit !important;
+        opacity: 1 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -99,9 +101,9 @@ def _render_observation_cell(row, is_open):
     obs_html = ""
     if t_obs:
         if prefix_label and not t_obs.startswith(prefix_label):
-            obs_html = f"<div style='color:#1e293b;'><strong>{prefix_label}</strong>{t_obs}</div>"
+            obs_html = f"<div><strong>{prefix_label}</strong>{t_obs}</div>"
         else:
-            obs_html = f"<div style='color:#1e293b;'>{t_obs}</div>"
+            obs_html = f"<div>{t_obs}</div>"
 
     if not is_open:
         return obs_html
@@ -146,9 +148,9 @@ def render_transaction_row(row, category_key):
     dec_fin = row.get("Décision finale", "-")
 
     badge_color = (
-        "#92400e" if dec_init == "Review"
-        else "#991b1b" if dec_init == "Blocked"
-        else "#0f766e"
+        "#f59e0b" if dec_init == "Review"
+        else "#f87171" if dec_init == "Blocked"
+        else "#2dd4bf"
     )
     initial_dec_text = (
         "Douteuse" if dec_init == "Review"
@@ -157,35 +159,35 @@ def render_transaction_row(row, category_key):
     )
 
     if dec_fin == "Review":
-        etat_final_html = "<span style='color: #475569; font-weight: 500;'>En attente</span>"
+        etat_final_html = "<span style='opacity: 0.8; font-weight: 500;'>En attente</span>"
     elif dec_init == "Blocked" and dec_fin == "Accepted":
         etat_final_html = (
-            "<span style='font-weight: 700; color: #0f172a;'>Validée après réclamation</span>"
-            + (f"<br><span style='font-size:12px; color:#475569;'>Motif : {t_motif}</span>" if t_motif else "")
+            "<span style='font-weight: 700;'>Validée après réclamation</span>"
+            + (f"<br><span style='font-size:12px; opacity:0.8;'>Motif : {t_motif}</span>" if t_motif else "")
         )
     elif dec_init == "Review" and dec_fin == "Blocked":
         etat_final_html = (
-            "<span style='font-weight: 700; color: #0f172a;'>Refusée après examen</span><br>"
-            "<span style='font-size: 12px; color: #475569;'>Refus manuel"
+            "<span style='font-weight: 700;'>Refusée après examen</span><br>"
+            "<span style='font-size: 12px; opacity: 0.8;'>Refus manuel"
             + (f" · Agent déclaré : {t_agent}" if t_agent else "")
             + (f" · {t_date_val}" if t_date_val else "")
             + "</span>"
-            + (f"<br><span style='font-size:12px; font-weight:600; color:#1e293b;'>Motif du refus — {t_motif}</span>" if t_motif else "")
+            + (f"<br><span style='font-size:12px; font-weight:600;'>Motif du refus — {t_motif}</span>" if t_motif else "")
         )
     elif dec_fin == "Accepted":
-        etat_final_html = "<span style='color: #0f766e; font-weight: 600;'>Acceptée</span>"
+        etat_final_html = "<span style='color: #2dd4bf; font-weight: 600;'>Acceptée</span>"
     else:
-        etat_final_html = "<span style='color: #0f172a;'>Refusée</span>"
+        etat_final_html = "<span style='font-weight: 600;'>Refusée</span>"
 
     if dec_fin == "Accepted" and dec_init == "Blocked" and t_agent:
         agent_html = (
             "Validation après réclamation ·<br>"
-            f"<span style='font-size: 12px; color:#334155;'>Agent déclaré : {t_agent}</span>"
+            f"<span style='font-size: 12px; opacity: 0.85;'>Agent déclaré : {t_agent}</span>"
         )
     elif t_agent:
         agent_html = (
             "Validation manuelle ·<br>"
-            f"<span style='font-size: 12px; color:#334155;'>Agent déclaré : {t_agent}</span>"
+            f"<span style='font-size: 12px; opacity: 0.85;'>Agent déclaré : {t_agent}</span>"
         )
     else:
         agent_html = "—"
@@ -195,20 +197,20 @@ def render_transaction_row(row, category_key):
 
     if show_obs:
         obs_cell_html = _render_observation_cell(row, is_open)
-        obs_col_html = f'<div style="flex: 2.4; color: #334155;">{obs_cell_html}</div>'
+        obs_col_html = f'<div style="flex: 2.4;">{obs_cell_html}</div>'
     else:
         obs_col_html = ""
 
     row_html = (
-        '<div style="display: flex; padding: 16px 12px; border-bottom: 1px solid #e2e8f0; background-color: #ffffff; font-size: 13px; align-items: flex-start; gap: 8px;">'
-        f'<div style="flex: 1.4;"><div style="color: #475569; font-size: 12px; margin-bottom: 4px;">{t_time}</div>'
-        f'<div style="background-color: #f0fdfa; border: 1px solid #99f6e4; display: inline-block; padding: 2px 8px; border-radius: 4px; font-weight: 700; color: #0f766e;">{t_id}</div></div>'
-        f'<div style="flex: 1; color: #0f172a; font-weight: 500;">{t_amount}</div>'
-        f'<div style="flex: 1; color: #0f172a;">{t_score}</div>'
+        '<div style="display: flex; padding: 16px 12px; border-bottom: 1px solid rgba(148, 163, 184, 0.25); font-size: 13px; align-items: flex-start; gap: 8px;">'
+        f'<div style="flex: 1.4;"><div style="opacity: 0.78; font-size: 12px; margin-bottom: 4px;">{t_time}</div>'
+        f'<div style="background-color: rgba(20, 184, 166, 0.14); border: 1px solid rgba(45, 212, 191, 0.4); display: inline-block; padding: 2px 8px; border-radius: 4px; font-weight: 700; color: #2dd4bf;">{t_id}</div></div>'
+        f'<div style="flex: 1; font-weight: 500;">{t_amount}</div>'
+        f'<div style="flex: 1;">{t_score}</div>'
         f'<div style="flex: 1.1; color: {badge_color}; font-weight: 700;">{initial_dec_text}</div>'
         f'<div style="flex: 2.3;">{etat_final_html}</div>'
-        f'<div style="flex: 1.8; color: #475569;">{agent_html}</div>'
-        f'<div style="flex: 1.4; color: #475569;">{t_motif if t_motif else "—"}</div>'
+        f'<div style="flex: 1.8; opacity: 0.85;">{agent_html}</div>'
+        f'<div style="flex: 1.4; opacity: 0.85;">{t_motif if t_motif else "—"}</div>'
         f'{obs_col_html}'
         '</div>'
     )
@@ -288,7 +290,7 @@ def render_table_header(show_obs=True):
     """Affiche la ligne d'en-tête du tableau."""
     obs_header = '<div style="flex: 2.4;">Observation</div>' if show_obs else ""
     header_html = (
-        '<div style="display: flex; background-color: #f0fdfa; color: #0f766e; padding: 12px; font-weight: 700; font-size: 13px; border-radius: 6px 6px 0 0; border-bottom: 2px solid #14b8a6; gap: 8px;">'
+        '<div style="display: flex; background-color: rgba(20, 184, 166, 0.14); color: #2dd4bf; padding: 12px; font-weight: 700; font-size: 13px; border-radius: 6px 6px 0 0; border-bottom: 2px solid #14b8a6; gap: 8px;">'
         '<div style="flex: 1.4;">Heure locale / ID</div>'
         '<div style="flex: 1;">Montant</div>'
         '<div style="flex: 1;">Score</div>'
@@ -323,7 +325,7 @@ def _history_body(category_key: str):
     c_lbl, c_dt, c_ex1, c_ex2, _ = st.columns([1.3, 1.5, 1.5, 1.5, 2.2])
     with c_lbl:
         st.markdown(
-            '<div style="padding-top:8px; font-size:14px; font-weight:600; color:#0f172a;">Date de référence</div>',
+            '<div style="padding-top:8px; font-size:14px; font-weight:600;">Date de référence</div>',
             unsafe_allow_html=True,
         )
     with c_dt:
@@ -372,7 +374,7 @@ def _history_body(category_key: str):
 @st.dialog("Rechercher une opération", width="large")
 def render_search_dialog():
     """Dialogue de recherche d'une opération par identifiant."""
-    st.markdown('<h2 style="margin:0 0 10px 0; font-size:24px; color:#0f172a;">Rechercher une opération</h2>', unsafe_allow_html=True)
+    st.markdown('<h2 style="margin:0 0 10px 0; font-size:24px;">Rechercher une opération</h2>', unsafe_allow_html=True)
 
     search_query = st.text_input("Identifiant FraudeScope", placeholder="Ex: FRS-000005")
 
@@ -407,9 +409,9 @@ def render_history(category_key: str) -> None:
     }
     title, note = config.get(category_key, ("Historique", ""))
 
-    st.markdown(f'<h2 style="margin:0; font-size:24px; color:#0f172a;">{title}</h2>', unsafe_allow_html=True)
+    st.markdown(f'<h2 style="margin:0; font-size:24px;">{title}</h2>', unsafe_allow_html=True)
     if note:
-        st.markdown(f'<div style="color:#475569; margin-top:4px; font-size:14px;">{note}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="opacity:0.8; margin-top:4px; font-size:14px;">{note}</div>', unsafe_allow_html=True)
 
     st.markdown('<div style="height:10px;"></div>', unsafe_allow_html=True)
     _history_body(category_key)
