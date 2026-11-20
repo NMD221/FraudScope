@@ -30,7 +30,7 @@ Cet onglet permet de :
 ### 4. Registre des opérations frauduleuses 
 * Centralise les transactions classées comme frauduleuses afin de faciliter le suivi et l'audit des cas critiques.
 
-### 5. Recherche d'opération par code unique (*Traçabilité & Audit*)
+### 5. Recherche d'opération par code unique 
 * Recherche directe d'une transaction à partir de son **code/identifiant unique** (`transaction_id`) pour afficher ses détails, son score de risque, son statut et les raisons associées.
 
 ---
@@ -44,36 +44,38 @@ Installer les dépendences : `pip install -r requirements.txt`
 Placez vous dans le dossier `Projet_Session_INF5103` puis lancer : `Streamlit run app.py`
 
 ---
-## Données, Méthodologie & Choix du Modèle
+## Données, Méthodologie et Choix du Modèle
 
-* **Jeu de données (`credit_card_fraud_2026.csv`, Kaggle) :** **20 000 transactions** et **26 colonnes** (`transaction_id` exclu dès la séparation pour éviter toute fuite, `is_fraud` en cible, et **24 variables explicatives** : 13 numériques, 5 catégorielles et 6 indicateurs booléens). **Aucune valeur manquante** et **aucun doublon** n'ont été relevés.
-* **Échantillonnage stratifié (avant tout prétraitement) :**
+* ** Le jeu de données utilisé est `credit_card_fraud_2026.csv`. Il provient de Kaggle. Ce jeu de donnée est constitué de : ** **20 000 transactions** et **26 colonnes** donc `transaction_id` (exclu dès la séparation pour éviter toute fuite),  `is_fraud` qui est la variable cible et **24 variables explicatives**. les variables explicatives sont repartie comme suit:  13 numériques, 5 catégorielles et 6 indicateurs booléens. Il est à noté que **Aucune valeur manquante** et **aucun doublon** n'ont été relevés.
+
+
+* **L'échantillonnage stratifié suivant a été utilisé:**
   * **Entraînement (64 %) :** 12 800 transactions (217 fraudes — 1,70 %)
   * **Validation (16 %) :** 3 200 transactions (54 fraudes — 1,69 %)
   * **Test (20 %) :** 4 000 transactions (68 fraudes — 1,70 %)
-* **Prétraitement (`ColumnTransformer` dans un `Pipeline` Scikit-learn) :**
-  * Variables numériques : `StandardScaler` retenu (PR-AUC de **0,4283** vs **0,4259** avec `RobustScaler`).
-  * Variables catégorielles : `OneHotEncoder(handle_unknown="ignore", min_frequency=20)`.
+
+* **Nous avons effectué le prétraitement suivant  :**
+  * Variables numériques : `StandardScaler` .
+  * Variables catégorielles : `OneHotEncoder`.
   * Variables booléennes : conservées en `0/1`.
-  * Variables dérivées : 10 variables testées (ratio montant/solde, compteur de signaux de risque, encodages cycliques heure/jour), non retenues faute de gain significatif.
-* **Gestion du déséquilibre :** Comparaison en validation croisée (5 plis) sur la régression logistique entre *(a) Rien*, *(b) `class_weight='balanced'`*, *(c) `SMOTE`* et *(d) `SMOTE + class_weight`*. L'option **(a) Rien** a été retenue.
+  
+* **Pour la gestion du déséquilibre, nous avons fait:** une omparaison en validation croisée avec 5 plis sur la régression logistique entre *(a) Rien*, *(b) `class_weight='balanced'`*, *(c) `SMOTE`* et *(d) `SMOTE + class_weight`*. L'option **(a) Rien** a été retenue.
 * **Comparaison des modèles (CV 5 plis) & Choix de la Régression Logistique :**
-  * **Régression Logistique (`max_iter=2000`) :** **PR-AUC = 0,4283** (lift de **25,3×** vs hasard à 0,0170), **ROC-AUC = 0,9453**, **F1 (0,5) = 0,3401**, **MCC = 0,3873**, **Bal. Acc = 0,6141**, temps **0,08 s**.
-  * Comparée à *Gradient Boosting* (PR-AUC **0,3512**), *Random Forest régularisée* (PR-AUC **0,3016**), *HistGradientBoosting* (PR-AUC **0,2359**) et *Dummy Classifier* (PR-AUC **0,0170**), la **Régression Logistique** a été retenue comme modèle final.
-* **Choix du seuil (`0,0164`) :** Déterminé sur l'ensemble de validation selon la règle préétablie visant un rappel cible $\ge 0,80$ lorsque le rappel au seuil F1-max est inférieur à 70 % (sur validation : rappel de **81,48 %**, précision de **9,89 %**, 445 alertes dont 44 fraudes détectées et 10 fraudes manquées).
+  * **La Régression Logistique (`max_iter=2000`) a été retenue comme model final.** 
+* **Choix du seuil  :** Il a été déterminé sur l'ensemble de validation selon la règle préétablie visant un rappel cible $\ge 0,80$.
 
 ---
 
-## Résultats sur le Jeu de Test & Stabilité
+## Résultats sur le Jeu de Test et Stabilité
 
-L'évaluation finale se fait sur le jeu de test (**4 000 transactions**, **68 fraudes**, seuil **0,0164**):
+L'évaluation finale fait sur le jeu de test (**4 000 transactions**, **68 fraudes**, seuil **0,0164**) a donné les résultats:
 
-* **PR-AUC :** **0,4598** (vs **0,3395** en validation)
+* **PR-AUC :** **0,4598** 
 * **ROC-AUC :** **0,9516**
 * **F1-Score :** **0,1971**
-* **Précision :** **11,07 %** (vs **9,89 %** en validation)
-* **Rappel (Recall) :** **89,71 %** (vs **81,48 %** en validation)
-* **MCC :** **0,2897** | **Exactitude équilibrée :** **88,62 %**
+* **Précision :** **11,07 %** 
+* **Rappel (Recall) :** **89,71 %** 
+
 
 ### Matrice de confusion sur le jeu de test
 
@@ -84,7 +86,7 @@ L'évaluation finale se fait sur le jeu de test (**4 000 transactions**, **68 fr
 
 ---
 
-## Explicabilité & Variables Clés
+## Explicabilité et Variables Clés
 
 L'interprétabilité du modèle a été analysée via l'**importance par permutation** (10 répétitions, mesurant la baisse moyenne de PR-AUC). Les variables les plus influentes sur le jeu de test incluent notamment `cvv_retry_count`, `merchant_risk_score`, `velocity_score`, `billing_shipping_mismatch`, `ip_country_mismatch` et `auth_method`.
 
@@ -107,4 +109,5 @@ FraudScope/
 │   ├── Notebook.ipynb          
 │   └── Notebook.py                
 ├── README.md                  
-└── requirements.txt            
+└── requirements.txt  
+  
