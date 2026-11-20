@@ -1,1 +1,0 @@
-Pour lancer l'application soyez dans le dossier et lancer dans un invite de commande : streamlit run dashboard.py
