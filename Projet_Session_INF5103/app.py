@@ -17,12 +17,11 @@ HISTORY_FILE = ROOT / "historique.csv"
 METRICS_FILE = ROOT / "models" / "metrics.json"
 POLICY_FILE = ROOT / "decision" / "decision-policy.json"
 
-# --- CSS GLOBAL (palette émeraude / sarcelle) ---
+# --- CSS GLOBAL (palette émeraude / sarcelle compatible thème clair et dark) ---
 st.markdown("""
 <style>
     /* On masque la navigation latérale de Streamlit */
     [data-testid="collapsedControl"], [data-testid="stSidebarNav"] {display: none;}
-    .stApp { background-color: #f8fafc; }
 
     /* Barre supérieure avec le logo */
     .top-bar {
@@ -36,17 +35,17 @@ st.markdown("""
 
     /* Boutons de navigation : pleine largeur, sur une seule ligne */
     div[data-testid="stHorizontalBlock"] .stButton > button {
-        background-color: #ffffff !important; color: #1e293b !important;
-        border: 1px solid #cbd5e1 !important; border-radius: 6px !important;
+        background-color: #1e293b !important; color: #f8fafc !important;
+        border: 1px solid #334155 !important; border-radius: 6px !important;
         padding: 8px 12px !important; font-weight: 600 !important;
         white-space: nowrap !important; font-size: 14px !important;
-        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05) !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
         width: 100% !important;
         transition: all 0.15s ease;
     }
     div[data-testid="stHorizontalBlock"] .stButton > button:hover {
-        background-color: #f0fdfa !important;
-        color: #0f766e !important;
+        background-color: #0f766e !important;
+        color: #ffffff !important;
         border-color: #14b8a6 !important;
     }
 
@@ -54,20 +53,33 @@ st.markdown("""
     div[data-testid="stFormSubmitButton"] > button {
         background-color: #0f766e !important;
         color: #ffffff !important;
-        border: 1px solid #0f766e !important;
+        border: 1px solid #14b8a6 !important;
         border-radius: 6px !important;
         font-weight: 600 !important;
         padding: 8px 20px !important;
     }
     div[data-testid="stFormSubmitButton"] > button:hover {
         background-color: #115e59 !important;
-        border-color: #115e59 !important;
+        border-color: #5eead4 !important;
     }
 
-    /* Cartes blanches autour des blocs */
+    /* Cartes autour des blocs : adaptées au thème courant */
     div[data-testid="stVerticalBlockBorderWrapper"] {
-        background-color: #ffffff; border-radius: 12px !important; padding: 24px !important;
-        box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.05); border: 1px solid #e2e8f0 !important;
+        border-radius: 12px !important;
+        padding: 24px !important;
+        border: 1px solid rgba(148, 163, 184, 0.35) !important;
+    }
+
+    /* Libellés de champs et accordéons toujours visibles en mode dark */
+    [data-testid="stWidgetLabel"],
+    [data-testid="stWidgetLabel"] p,
+    [data-testid="stCheckbox"] label,
+    [data-testid="stCheckbox"] label p,
+    [data-testid="stExpander"] summary,
+    [data-testid="stExpander"] summary p,
+    [data-testid="stExpander"] summary span {
+        color: inherit !important;
+        opacity: 1 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -356,7 +368,7 @@ col_left, col_right = st.columns([1.5, 1], gap="large")
 with col_left:
     with st.container(border=True):
         st.markdown(
-            "<h2 style='margin-top: 0; font-size: 24px; margin-bottom: 20px; color: #0f172a;'>"
+            "<h2 style='margin-top: 0; font-size: 24px; margin-bottom: 20px;'>"
             "Données de l'opération</h2>",
             unsafe_allow_html=True,
         )
@@ -494,7 +506,7 @@ with col_right:
 
         with st.container(border=True):
             st.markdown(
-                "<h2 style='margin-top: 0; font-size: 24px; margin-bottom: 20px; color: #0f172a;'>"
+                "<h2 style='margin-top: 0; font-size: 24px; margin-bottom: 20px;'>"
                 "Résultat</h2>",
                 unsafe_allow_html=True,
             )
@@ -514,26 +526,26 @@ with col_right:
             """, unsafe_allow_html=True)
 
             st.markdown(
-                "<div style='display: flex; justify-content: space-between; font-size: 16px; margin-bottom: 10px; color: #0f172a;'>"
+                "<div style='display: flex; justify-content: space-between; font-size: 16px; margin-bottom: 10px;'>"
                 f"<span>Score de fraude</span><strong>{percent(proba)}</strong></div>",
                 unsafe_allow_html=True,
             )
 
             color_bar = "#ef4444" if is_blocked else "#f59e0b" if is_review else "#0d9488"
             st.markdown(f"""
-            <div style="width: 100%; background-color: #e2e8f0; border-radius: 4px; height: 8px; margin-bottom: 15px;">
+            <div style="width: 100%; background-color: rgba(148, 163, 184, 0.3); border-radius: 4px; height: 8px; margin-bottom: 15px;">
                 <div style="width: {min(proba * 100, 100)}%; background-color: {color_bar}; height: 8px; border-radius: 4px;"></div>
             </div>
             """, unsafe_allow_html=True)
 
             st.markdown(
-                "<div style='display: flex; justify-content: space-between; color: #475569; font-size: 14px; margin-bottom: 5px;'>"
+                "<div style='display: flex; justify-content: space-between; opacity: 0.8; font-size: 14px; margin-bottom: 5px;'>"
                 f"<span>Seuil de validation</span><span>{percent(seuil_validation)}</span></div>",
                 unsafe_allow_html=True,
             )
             if seuil_refus is not None:
                 st.markdown(
-                    "<div style='display: flex; justify-content: space-between; color: #475569; font-size: 14px;'>"
+                    "<div style='display: flex; justify-content: space-between; opacity: 0.8; font-size: 14px;'>"
                     f"<span>Seuil de refus</span><span>{percent(seuil_refus)}</span></div>",
                     unsafe_allow_html=True,
                 )
@@ -541,7 +553,7 @@ with col_right:
         if metrics:
             with st.container(border=True):
                 st.markdown(
-                    "<h2 style='margin-top: 0; font-size: 20px; margin-bottom: 15px; color: #0f172a;'>Performance du modèle</h2>",
+                    "<h2 style='margin-top: 0; font-size: 20px; margin-bottom: 15px;'>Performance du modèle</h2>",
                     unsafe_allow_html=True,
                 )
 
@@ -552,8 +564,8 @@ with col_right:
                     (c3, "Score F1", "f1"),
                 ]:
                     col_m.markdown(
-                        "<div style='background-color: #f8fafc; border: 1px solid #e2e8f0; border-top: 3px solid #14b8a6; padding: 10px; border-radius: 8px; text-align: center;'>"
-                        f"<div style='color: #475569; font-size: 12px; margin-bottom: 5px;'>{lbl_m}</div>"
-                        f"<div style='font-size: 20px; font-weight: bold; color: #0f172a;'>{percent(metrics[key_m])}</div></div>",
+                        "<div style='background-color: rgba(15, 23, 42, 0.06); border: 1px solid rgba(148, 163, 184, 0.35); border-top: 3px solid #14b8a6; padding: 10px; border-radius: 8px; text-align: center;'>"
+                        f"<div style='opacity: 0.8; font-size: 12px; margin-bottom: 5px;'>{lbl_m}</div>"
+                        f"<div style='font-size: 20px; font-weight: bold;'>{percent(metrics[key_m])}</div></div>",
                         unsafe_allow_html=True,
                     )

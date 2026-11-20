@@ -7,3 +7,8 @@ venv/
 .DS_Store
 train_equilibre.csv
 test_original.csv
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+*.nbconvert.ipynb
