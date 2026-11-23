@@ -1,0 +1,19 @@
+credit_card_fraud_2026.csv
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.DS_Store
+train_equilibre.csv
+test_original.csv
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+*.nbconvert.ipynb
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+historique.csv
+.streamlit/secrets.toml

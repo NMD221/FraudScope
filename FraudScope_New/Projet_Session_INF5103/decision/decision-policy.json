@@ -1,0 +1,20 @@
+{
+  "thresholds": {
+    "review": 0.016437872340706757,
+    "block": null
+  },
+  "test": {
+    "accepted": [
+      3442,
+      7
+    ],
+    "review": [
+      490,
+      61
+    ],
+    "blocked": [
+      0,
+      0
+    ]
+  }
+}
