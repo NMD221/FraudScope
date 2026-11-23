@@ -1,5 +1,0 @@
-Date et heure,ID,Montant (USD),Score de fraude,Décision,Décision finale,Observation,Agent,Motif,Date validation,Facteurs
-19/11/2026 03:16:22,FRS-000001,125.0,0.04 %,Accepted,Accepted,,,,,"{""items"": [""Aucun facteur particulier au-dessus de la référence.""], ""coverage"": """"}"
-19/11/2026 03:16:41,FRS-000002,125.0,99.77 %,Review,Review,"Mise en attente. Le score de 99,77 % atteint le seuil de vérification de 1,64 %.",,,,"{""items"": [""Nouvelles tentatives de CVV : 7 · 100,0 %""], ""coverage"": ""Ces facteurs couvrent 100,0 % des contributions qui ont augmenté le score.""}"
-19/11/2026 03:18:01,FRS-000003,125.0,0.04 %,Accepted,Accepted,,,,,"{""items"": [""Aucun facteur particulier au-dessus de la référence.""], ""coverage"": """"}"
-20/11/2026 03:22:39,FRS-000004,125.0,0.04 %,Accepted,Accepted,,,,,"{""items"": [""Aucun facteur particulier au-dessus de la référence.""], ""coverage"": """"}"

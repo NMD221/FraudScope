@@ -1,113 +1,68 @@
+# FraudScope
 
-# FraudScope 
+FraudScope analyse les transactions par carte et permet de suivre leur examen. Cette livraison comprend l’application Python, le modèle entraîné et les fichiers de l’étude.
 
-## Presentation
-
-**FraudScope** est une application python d'apprentissage automatique et d'aide à la décision conçue pour détecter, expliquer et superviser les transactions financières à risque. Cette application a été réalisée dans le cadre du cours sur les concepts statistiques pour la science de donnée(INF5103) à l'Université du Québec en Outaouais. Elle combine un pipeline de classification fondé sur la **Régression Logistique** (entraîné sur **20 000 transactions** avec **1,70 % de fraudes**) avec une interface opérationnelle multi-vues destinée aux analystes de fraude.
-
----
-## Fonctionnalités de l'application
-
-L'interface interactive (**Streamlit** dans `app.py`) s'articule autour de **5 modules dédiés** pour superviser les transactions :
-
-### 1. Tableau de bord d'analyse des opérations 
-Il permet de :
-* Simuler une transaction en temps réel.
-* Visualiser le résultat de la simulation d'une transaction.
-* Visualiser les indicateurs de performance du modèle.
-
-### 2. Suivi des opérations courantes 
-Cet onglet permet de :
-* Consulter et filtrer des opérations exécutées normalement sans alerte de sécurité.
-* Suivre le flux nominal des transactions.
-
-### 3. Suivi des opérations douteuses
-
-* Regroupe les transactions suspectes nécessitant une vérification humaine.
-* **Raisons de classement :** Affiche pour chaque opération les **principales raisons** expliquant son classement comme douteuse.
-* **Validation / Refus :** Permet à l'analyste de **valider** ou de **refuser** chaque opération, avec mise à jour dans `historique.csv`.
-
-### 4. Registre des opérations frauduleuses 
-* Centralise les transactions classées comme frauduleuses afin de faciliter le suivi et l'audit des cas critiques.
-
-### 5. Recherche d'opération par code unique 
-* Recherche directe d'une transaction à partir de son **code/identifiant unique** (`transaction_id`) pour afficher ses détails, son score de risque, son statut et les raisons associées.
-
----
 ## Installation
 
-Installer les dépendences : `pip install -r requirements.txt`
+Utiliser Python **3.14**. Extraire l’archive et ouvrir le dossier dans PyCharm ou dans un terminal.
 
----
-## Lancement
+Depuis le dossier contenant ce README, exécuter les commandes suivantes.
 
-Placez vous dans le dossier `Projet_Session_INF5103` puis lancer : `Streamlit run app.py`
+```powershell
+python -m venv .venv
+& ".\.venv\Scripts\python.exe" -m pip install -r requirements.txt
+& ".\.venv\Scripts\python.exe" -m streamlit run ".\Projet_Session_INF5103\app.py"
+```
 
----
-## Données, Méthodologie et Choix du Modèle
+Ouvrir l’adresse affichée dans le terminal, généralement [http://localhost:8501](http://localhost:8501). Pour arrêter l’application, utiliser **Ctrl + C**.
 
-* ** Le jeu de données utilisé est `credit_card_fraud_2026.csv`. Il provient de Kaggle. Ce jeu de donnée est constitué de : ** **20 000 transactions** et **26 colonnes** donc `transaction_id` (exclu dès la séparation pour éviter toute fuite),  `is_fraud` qui est la variable cible et **24 variables explicatives**. les variables explicatives sont repartie comme suit:  13 numériques, 5 catégorielles et 6 indicateurs booléens. Il est à noté que **Aucune valeur manquante** et **aucun doublon** n'ont été relevés.
+## Utilisation
 
+- **Analyser une opération** avec les 24 champs du formulaire. Les valeurs préremplies sont destinées aux essais.
+- **Consulter les opérations** courantes, douteuses ou frauduleuses depuis la navigation.
+- **Rechercher une opération** par son numéro court, son identifiant complet ou sa référence externe. Cliquer sur un résultat pour ouvrir le dossier.
+- **Valider ou confirmer une fraude** en renseignant l’identifiant de l’agent et le motif. Le dossier conserve les décisions successives avec leur date et leur auteur.
+- **Exporter la journée ou la semaine** depuis la catégorie souhaitée, avec un choix de date distinct pour chaque période. L’export comprend les colonnes distinctes de l’agent et du motif de validation.
 
-* **L'échantillonnage stratifié suivant a été utilisé:**
-  * **Entraînement (64 %) :** 12 800 transactions (217 fraudes — 1,70 %)
-  * **Validation (16 %) :** 3 200 transactions (54 fraudes — 1,69 %)
-  * **Test (20 %) :** 4 000 transactions (68 fraudes — 1,70 %)
+Le montant supérieur au solde entraîne un blocage avec le motif **Solde insuffisant**. Les alertes du modèle sont classées comme douteuses en attendant leur examen. Après 7 jours sans décision, elles passent automatiquement dans les opérations frauduleuses avec le motif **Défaut de validation**. Cette action est datée et attribuée au système dans l’historique.
 
-* **Nous avons effectué le prétraitement suivant  :**
-  * Variables numériques : `StandardScaler` .
-  * Variables catégorielles : `OneHotEncoder`.
-  * Variables booléennes : conservées en `0/1`.
-  
-* **Pour la gestion du déséquilibre, nous avons fait:** une omparaison en validation croisée avec 5 plis sur la régression logistique entre *(a) Rien*, *(b) `class_weight='balanced'`*, *(c) `SMOTE`* et *(d) `SMOTE + class_weight`*. L'option **(a) Rien** a été retenue.
-* **Comparaison des modèles (CV 5 plis) & Choix de la Régression Logistique :**
-  * **La Régression Logistique (`max_iter=2000`) a été retenue comme model final.** 
-* **Choix du seuil  :** Il a été déterminé sur l'ensemble de validation selon la règle préétablie visant un rappel cible $\ge 0,80$.
+Les montants analysés sont exprimés en USD. Les facteurs affichés expliquent les principales variations du score selon la méthode fournie avec le modèle.
 
----
+## Charger un fichier de transactions
 
-## Résultats sur le Jeu de Test et Stabilité
+Dans **Chargement CSV**, sélectionner un fichier, cliquer sur **Charger un CSV**, puis sur **Démarrer**. Le traitement peut être interrompu avec **Pause**.
 
-L'évaluation finale fait sur le jeu de test (**4 000 transactions**, **68 fraudes**, seuil **0,0164**) a donné les résultats:
+Le CSV doit contenir les 24 champs du formulaire sous leurs noms techniques. Les champs booléens acceptent `true` / `false` ou `1` / `0`. Les colonnes `bank_reference`, `original_amount` et `original_currency` sont facultatives. Le montant et la devise d’origine doivent être fournis ensemble.
 
-* **PR-AUC :** **0,4598** 
-* **ROC-AUC :** **0,9516**
-* **F1-Score :** **0,1971**
-* **Précision :** **11,07 %** 
-* **Rappel (Recall) :** **89,71 %** 
+## Archives hebdomadaires
 
+La semaine d’exportation va du dimanche au samedi. La période sélectionnée est affichée avant le téléchargement.
 
-### Matrice de confusion sur le jeu de test
+Chaque dimanche à 1 h, selon l’heure locale de la machine, l’application crée une archive ZIP de la semaine terminée, contenant un CSV pour chaque catégorie. L’application doit rester démarrée pour réaliser cette tâche à l’heure prévue. Si elle était arrêtée, les semaines manquantes sont archivées à la prochaine ouverture, notamment au premier démarrage du lundi.
 
-| Réel \ Prédit | Légitime | Fraude |
-| :--- | :---: | :---: |
-| **Légitime** | **3 442 (VN)** | **490 (FP)** |
-| **Fraude** | **7 (FN)** | **61 (VP)** |
+Dans la recherche accessible par la loupe, ouvrir **Archives hebdomadaires** pour choisir une semaine et télécharger son ZIP ou le CSV d’une catégorie. Ces archives sont conservées dans la base de données et reflètent les décisions connues au moment de leur création.
 
----
+## Conserver les opérations
 
-## Explicabilité et Variables Clés
+L’application crée automatiquement la base `Projet_Session_INF5103/fraudscope.sqlite3`. Les données restent disponibles après redémarrage. Pour sauvegarder la base par copie, arrêter d’abord l’application.
 
-L'interprétabilité du modèle a été analysée via l'**importance par permutation** (10 répétitions, mesurant la baisse moyenne de PR-AUC). Les variables les plus influentes sur le jeu de test incluent notamment `cvv_retry_count`, `merchant_risk_score`, `velocity_score`, `billing_shipping_mismatch`, `ip_country_mismatch` et `auth_method`.
+Pour reprendre un ancien fichier `historique.csv`, conserver une sauvegarde du fichier, puis lancer la commande suivante depuis le dossier de ce README.
 
----
+```powershell
+& ".\.venv\Scripts\python.exe" ".\Projet_Session_INF5103\_suivi_common.py" --import-history "C:/chemin/historique.csv"
+```
 
-## Architecture du Projet
+L’import reprend les informations présentes dans le CSV. Les décisions déjà écrasées dans l’ancien fichier ne peuvent pas être reconstituées.
 
-La structure de l'application est la suivante:
+## Fichiers du projet
 
-```text
-FraudScope/
-├── Projet_Session_INF5103/
-│   ├── credit/                 
-│   ├── decision/               
-│   ├── figures/               
-│   ├── models/                 
-│   ├── _suivi_common.py       
-│   ├── app.py                 
-│   ├── historique.csv         
-│   ├── Notebook.ipynb          
-│   └── Notebook.py                
-├── README.md                  
-└── requirements.txt  
-  
+| Fichier ou dossier | Usage |
+|---|---|
+| `Projet_Session_INF5103/app.py` | Formulaire et navigation |
+| `Projet_Session_INF5103/_suivi_common.py` | Analyse, dossiers, historique et exports |
+| `Projet_Session_INF5103/models/` | Modèle entraîné et résultats d’évaluation |
+| `Projet_Session_INF5103/decision/` | Seuil de vérification |
+| `Projet_Session_INF5103/Notebook.ipynb` et `Notebook.py` | Étude et entraînement |
+| `Projet_Session_INF5103/figures/` | Graphiques de l’étude |
+| `requirements.txt` | Dépendances Python |
+

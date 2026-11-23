@@ -1052,8 +1052,8 @@ metrics_data = {
     "fp": legit_signale,  "tn": n_legit - legit_signale,
 }
 
-Path("backend").mkdir(exist_ok=True)
-Path("backend/decision-policy.json").write_text(
+Path("decision").mkdir(exist_ok=True)
+Path("decision/decision-policy.json").write_text(
     json.dumps(policy_data, indent=2, ensure_ascii=False), encoding="utf-8"
 )
 Path("models").mkdir(exist_ok=True)
@@ -1061,7 +1061,7 @@ Path("models/metrics.json").write_text(
     json.dumps(metrics_data, indent=2, ensure_ascii=False), encoding="utf-8"
 )
 
-print("backend/decision-policy.json + models/metrics.json générés")
+print("decision/decision-policy.json + models/metrics.json générés")
 print(f"{fraude_signale} fraudes signalées / {n_fraude} "
       f"({legit_signale} fausses alertes)")
 

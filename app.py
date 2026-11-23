@@ -6,7 +6,7 @@ from uuid import uuid4
 import pandas as pd
 import streamlit as st
 
-from _suivi_common import (
+from Projet_Session_INF5103._suivi_common import (
     DEFAULTS,
     FIELDS,
     Service,
